@@ -1,0 +1,28 @@
+name: real_todo
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.5.3 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  velocity_x: ^4.2.1  # Updated to the latest version
+  http: ^1.2.2
+  shared_preferences: ^2.3.2
+  jwt_decoder: ^2.0.1
+  flutter_slidable: ^3.1.1
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0  # Updated to the latest version
+
+flutter:
+  uses-material-design: true
+
+  # You can add your assets and fonts here as needed.
