@@ -25,47 +25,30 @@ class _SignInPageState extends State<SignInPage> {
     initSharedPref();
   }
 
-  void initSharedPref() async {
+  void initSharedPref() async{
     prefs = await SharedPreferences.getInstance();
   }
 
-  void loginUser() async {
-    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-      setState(() {
-        _isNotValidate = true;
-      });
-      return;
-    } else {
-      setState(() {
-        _isNotValidate = false;
-      });
-    }
+  void loginUser() async{
+    if(emailController.text.isNotEmpty && passwordController.text.isNotEmpty){
+      var reqBody = {
+        "email":emailController.text,
+        "password":passwordController.text
+      };
 
-    var reqBody = {
-      "email": emailController.text,
-      "password": passwordController.text
-    };
-
-    try {
       var response = await http.post(Uri.parse(login),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(reqBody));
+          headers: {"Content-Type":"application/json"},
+          body: jsonEncode(reqBody)
+      );
 
-      if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
-        if (jsonResponse['status']) {
-          var myToken = jsonResponse['token'];
-          prefs.setString('token', myToken);
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Dashboard(token: myToken)));
-        } else {
-          print('Login failed: ${jsonResponse['message']}');
-        }
+      var jsonResponse = jsonDecode(response.body);
+      if(jsonResponse['status']){
+        var myToken = jsonResponse['token'];
+        prefs.setString('token', myToken);
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>Dashboard(token: myToken)));
       } else {
-        print("Server error: ${response.statusCode}");
+        print('Something went wrong');
       }
-    } catch (e) {
-      print("Error occurred: $e");
     }
   }
 
@@ -78,9 +61,12 @@ class _SignInPageState extends State<SignInPage> {
           height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-                colors: [const Color(0XFFE0C3FC), const Color(0XFF8EC5FC)], // Light purple-blue gradient
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight),
+              colors: [Color(0xFF9C27B0), Color(0xFF4A148C)], // here we are fading purple
+              begin: FractionalOffset.topLeft,
+              end: FractionalOffset.bottomCenter,
+              stops: [0.0, 0.8],
+              tileMode: TileMode.mirror,
+            ),
           ),
           child: Center(
             child: SingleChildScrollView(
@@ -88,51 +74,40 @@ class _SignInPageState extends State<SignInPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   CommonLogo(),
-                  HeightBox(20),
-                  "Sign In".text.size(26).bold.gray700.make(),
-                  SizedBox(height: 10),
+                  HeightBox(10),
+                  "Email Sign-In".text.size(22).yellow100.make(),
+
                   TextField(
                     controller: emailController,
+                    keyboardType: TextInputType.text,
                     decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        hintText: "Email",
-                        errorText: _isNotValidate ? "Enter Proper Info" : null,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                        enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5))),
-                  ).p8().px24(),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: "Email",
+                      errorText: _isNotValidate ? "Enter Proper Info" : null,
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                    ),
+                  ).p4().px24(),
                   TextField(
                     controller: passwordController,
-                    obscureText: true,
+                    keyboardType: TextInputType.text,
                     decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        hintText: "Password",
-                        errorText: _isNotValidate ? "Enter Proper Info" : null,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                        enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5))),
-                  ).p8().px24(),
-                  SizedBox(height: 20),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: "Password",
+                      errorText: _isNotValidate ? "Enter Proper Info" : null,
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                    ),
+                  ).p4().px24(),
                   GestureDetector(
                     onTap: () {
                       loginUser();
                     },
-                    child: Container(
-                      width: MediaQuery.of(context).size.width * 0.85,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                          color: Colors.deepPurpleAccent,
-                          borderRadius: BorderRadius.circular(12)),
-                      child: "Log In"
-                          .text
-                          .white
-                          .size(18)
-                          .makeCentered(),
-                    ),
+                    child: HStack([
+                      VxBox(child: "LogIn".text.white.makeCentered().p16()).green600.roundedLg.make(),
+                    ]),
                   ),
                 ],
               ),
@@ -144,15 +119,10 @@ class _SignInPageState extends State<SignInPage> {
             Navigator.push(context, MaterialPageRoute(builder: (context) => Registration()));
           },
           child: Container(
-              height: 50,
-              color: Colors.deepPurpleAccent,
-              child: Center(
-                  child: "Create a new Account! Sign Up"
-                      .text
-                      .white
-                      .bold
-                      .size(16)
-                      .makeCentered())),
+            height: 25,
+            color: Colors.lightBlue,
+            child: Center(child: "Create a new Account..! Sign Up".text.white.makeCentered()),
+          ),
         ),
       ),
     );

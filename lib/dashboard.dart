@@ -8,110 +8,107 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 
 class Dashboard extends StatefulWidget {
   final token;
-  const Dashboard({@required this.token,Key? key}) : super(key: key);
+  const Dashboard({@required this.token, Key? key}) : super(key: key);
 
   @override
   State<Dashboard> createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
-
   late String userId;
   TextEditingController _todoTitle = TextEditingController();
   TextEditingController _todoDesc = TextEditingController();
   List? items;
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    Map<String,dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
-
+    Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
     userId = jwtDecodedToken['_id'];
     getTodoList(userId);
   }
 
-  void addTodo() async{
-    if(_todoTitle.text.isNotEmpty && _todoDesc.text.isNotEmpty){
-
+  void addTodo() async {
+    if (_todoTitle.text.isNotEmpty && _todoDesc.text.isNotEmpty) {
       var regBody = {
-        "userId":userId,
-        "title":_todoTitle.text,
-        "desc":_todoDesc.text
+        "userId": userId,
+        "title": _todoTitle.text,
+        "desc": _todoDesc.text
       };
 
       var response = await http.post(Uri.parse(addtodo),
-          headers: {"Content-Type":"application/json"},
-          body: jsonEncode(regBody)
-      );
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(regBody));
 
       var jsonResponse = jsonDecode(response.body);
 
       print(jsonResponse['status']);
 
-      if(jsonResponse['status']){
+      if (jsonResponse['status']) {
         _todoDesc.clear();
         _todoTitle.clear();
         Navigator.pop(context);
         getTodoList(userId);
-      }else{
-        print("SomeThing Went Wrong");
+      } else {
+        print("Something Went Wrong");
       }
     }
   }
 
   void getTodoList(userId) async {
     var regBody = {
-      "userId":userId
+      "userId": userId
     };
 
     var response = await http.post(Uri.parse(getToDoList),
-        headers: {"Content-Type":"application/json"},
-        body: jsonEncode(regBody)
-    );
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(regBody));
 
     var jsonResponse = jsonDecode(response.body);
-    items = jsonResponse['success'];
+    print('API Response: $jsonResponse'); // Log the response
 
-    setState(() {
-
-    });
+    // Ensure the API response contains the expected data
+    if (jsonResponse['success'] != null) {
+      setState(() {
+        items = jsonResponse['success'];
+      });
+    } else {
+      print("No todos found or error in API response");
+    }
   }
 
-  void deleteItem(id) async{
+  void deleteItem(id) async {
     var regBody = {
-      "id":id
+      "id": id
     };
 
     var response = await http.post(Uri.parse(deleteTodo),
-        headers: {"Content-Type":"application/json"},
-        body: jsonEncode(regBody)
-    );
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(regBody));
 
     var jsonResponse = jsonDecode(response.body);
-    if(jsonResponse['status']){
+    if (jsonResponse['status']) {
       getTodoList(userId);
     }
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlueAccent,
+      backgroundColor: Colors.purpleAccent,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.only(top: 60.0,left: 30.0,right: 30.0,bottom: 30.0),
+            padding: EdgeInsets.only(top: 60.0, left: 30.0, right: 30.0, bottom: 30.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(child: Icon(Icons.list,size: 30.0,),backgroundColor: Colors.white,radius: 30.0,),
+                CircleAvatar(child: Icon(Icons.list, size: 30.0), backgroundColor: Colors.white, radius: 30.0),
                 SizedBox(height: 10.0),
-                Text('Nicks A+ ToDo',style: TextStyle(fontSize: 30.0,fontWeight: FontWeight.w700),),
+                Text('To-do', style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.w700)),
                 SizedBox(height: 8.0),
-                Text('Solve world problems now',style: TextStyle(fontSize: 20),),
-
+                Text('Enter your To-Dos with the arrow below', style: TextStyle(fontSize: 20)),
               ],
             ),
           ),
@@ -119,17 +116,19 @@ class _DashboardState extends State<Dashboard> {
             child: Container(
               decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(20),topRight: Radius.circular(20))
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))
               ),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: items == null ? null : ListView.builder(
+                child: items == null
+                    ? Center(child: CircularProgressIndicator())  // Show loading spinner while fetching data
+                    : ListView.builder(
                     itemCount: items!.length,
-                    itemBuilder: (context,int index){
+                    itemBuilder: (context, int index) {
                       return Slidable(
-                        key: const ValueKey(0),
+                        key: ValueKey(items![index]['_id']),
                         endActionPane: ActionPane(
-                          motion: const ScrollMotion(),
+                          motion: ScrollMotion(),
                           dismissible: DismissiblePane(onDismissed: () {}),
                           children: [
                             SlidableAction(
@@ -138,7 +137,6 @@ class _DashboardState extends State<Dashboard> {
                               icon: Icons.delete,
                               label: 'Delete',
                               onPressed: (BuildContext context) {
-                                print('${items![index]['_id']}');
                                 deleteItem('${items![index]['_id']}');
                               },
                             ),
@@ -158,11 +156,11 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () =>_displayTextInputDialog(context) ,
+        onPressed: () => _displayTextInputDialog(context),
         child: Icon(Icons.add),
         tooltip: 'Add-ToDo',
       ),
@@ -185,8 +183,7 @@ class _DashboardState extends State<Dashboard> {
                         filled: true,
                         fillColor: Colors.white,
                         hintText: "Title",
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                   ).p4().px8(),
                   TextField(
                     controller: _todoDesc,
@@ -195,10 +192,9 @@ class _DashboardState extends State<Dashboard> {
                         filled: true,
                         fillColor: Colors.white,
                         hintText: "Description",
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                   ).p4().px8(),
-                  ElevatedButton(onPressed: (){
+                  ElevatedButton(onPressed: () {
                     addTodo();
                   }, child: Text("Add"))
                 ],
@@ -207,4 +203,3 @@ class _DashboardState extends State<Dashboard> {
         });
   }
 }
-

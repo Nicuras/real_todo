@@ -33,12 +33,10 @@ class _RegistrationState extends State<Registration> {
 
       var jsonResponse = jsonDecode(response.body);
 
-      print(jsonResponse['status']);
-
       if (jsonResponse['status']) {
         Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage()));
       } else {
-        print("App crashed, restart and rerun");
+        print("Something Went Wrong");
       }
     } else {
       setState(() {
@@ -56,7 +54,7 @@ class _RegistrationState extends State<Registration> {
           height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [const Color(0xFF1E3C72), const Color(0xFF2A5298)],  // Updated blue gradient
+              colors: [Color(0xFF9C27B0), Color(0xFF4A148C)], // Purple gradient colors
               begin: FractionalOffset.topLeft,
               end: FractionalOffset.bottomCenter,
               stops: [0.0, 0.8],
@@ -75,49 +73,53 @@ class _RegistrationState extends State<Registration> {
                     controller: emailController,
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        errorStyle: TextStyle(color: Colors.white),
-                        errorText: _isNotValidate ? "Enter Proper Info" : null,
-                        hintText: "Email",
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                      filled: true,
+                      fillColor: Colors.white,
+                      errorStyle: TextStyle(color: Colors.white),
+                      errorText: _isNotValidate ? "Enter Proper Info" : null,
+                      hintText: "Email",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                    ),
                   ).p4().px24(),
                   TextField(
                     controller: passwordController,
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
-                        suffixIcon: IconButton(icon: Icon(Icons.copy), onPressed: () {
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.copy),
+                        onPressed: () {
                           final data = ClipboardData(text: passwordController.text);
                           Clipboard.setData(data);
-                        }),
-                        prefixIcon: IconButton(icon: Icon(Icons.password), onPressed: () {
+                        },
+                      ),
+                      prefixIcon: IconButton(
+                        icon: Icon(Icons.password),
+                        onPressed: () {
                           String passGen = generatePassword();
                           passwordController.text = passGen;
                           setState(() {});
-                        }),
-                        filled: true,
-                        fillColor: Colors.white,
-                        errorStyle: TextStyle(color: Colors.white),
-                        errorText: _isNotValidate ? "Enter Proper Info" : null,
-                        hintText: "Password",
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                        },
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      errorStyle: TextStyle(color: Colors.white),
+                      errorText: _isNotValidate ? "Enter Proper Info" : null,
+                      hintText: "Password",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                    ),
                   ).p4().px24(),
                   HStack([
                     GestureDetector(
-                      onTap: () => {registerUser()},
-                      child: VxBox(child: "Register".text.white.makeCentered().p16())
-                          .green600
-                          .roundedLg
-                          .make()
-                          .px16()
-                          .py16(),
+                      onTap: () {
+                        registerUser();
+                      },
+                      child: VxBox(child: "Register".text.white.makeCentered().p16()).green600.roundedLg.make().px16().py16(),
                     ),
                   ]),
                   GestureDetector(
                     onTap: () {
-                      print("Sign In");
                       Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage()));
                     },
                     child: HStack([
@@ -142,13 +144,10 @@ String generatePassword() {
   String symbols = '!@#\$%^&*()<>,./';
 
   String password = '';
-
   int passLength = 20;
 
   String seed = upper + lower + numbers + symbols;
-
   List<String> list = seed.split('').toList();
-
   Random rand = Random();
 
   for (int i = 0; i < passLength; i++) {
